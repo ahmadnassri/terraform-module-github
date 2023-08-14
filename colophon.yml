@@ -1,8 +1,8 @@
 version: 2.0
 
-id: template-terraform-module
+id: terraform-module-github
 
 about:
-  title: Template for Terraform Modules Templates Repositories
-  description: Template for Terraform Modules Templates Repositories
-  repository: ahmadnassri/template-terraform-module
+  title: GitHub Terraform Module
+  description: an opinionated module for managing entire user/org github repositories
+  repository: ahmadnassri/terraform-module-github

@@ -1,39 +1,58 @@
 ## Usage
 
-#### Terraform Module Template
+```tf
+module "github" {
+  source = "github.com/ahmadnassri/terraform-module-github"
 
-> Automated through [`@ahmadnassri/action-template-repository-sync`][]
+  repos = { ... }
+}
+```
 
-1. create a repository from the module
-1. clone locally
-1. update `colophon.yml`, `docs/README.md` with info about the project
+## Inputs
 
-## Local Automation
+| Name       | Type     | Default | Required | Description                      |
+| ---------- | -------- | ------- | -------- | -------------------------------- |
+| `owner`    | `string` | `-`     | ✅       | github owner                     |
+| `repos`    | `map`    | `-`     | ✅       | repositories configuration       |
+| `defaults` | `object` | `{}`    | ❌       | default repository configuration |
+| `secrets`  | `object` | `{}`    | ❌       | secrets to manage                |
 
-| command      | description                                        |
-| ------------ | -------------------------------------------------- |
-| pull         | pull latest containers                             |
-| lint         | run mega-linter                                    |
-| readme       | run readme action                                  |
-| init         | init terraform & install plugins                   |
-| upgrade      | upgrade terraform provider                         |
-| refresh      | refresh state                                      |
-| format       | clean up terraform file                            |
-| validate     | validate your changes                              |
-| unlock       | force unlock remote state                          |
-| list         | list terraform resources                           |
-| plan         | show terraform plan                                |
-| apply        | apply terraform changes                            |
-| apply-target | apply terraform changes to specific target         |
-| shell        | start the container shell                          |
-| clean        | remove running containers, volumes & anything else |
-| help         | display this help                                  |
+## `repos`
 
-> **Note:**  
-> Your main `README.md` file is in `docs/README.md`, the file at root is generated using [pandoc] using the provided [template][].
->
-> You should run `make readme` after any change to `docs/README.md` and before commit / push
+A `map` of repositories to create / manage
 
-[template]: ./docs/README.template
-[pandoc]: https://pandoc.org/
-[`@ahmadnassri/action-template-repository-sync`]: https://github.com/ahmadnassri/action-template-repository-sync
+```tf
+repos = {
+  <name> = { <configuration> },
+  <name> = { <configuration> },
+  ...
+}
+```
+
+###### Example
+
+```tf
+repos = {
+  terraform = {
+    description = "infrastructure as code"
+  }
+}
+```
+
+| Name                     | Type           | Default  | Required | Description                                                      |
+| ------------------------ | -------------- | -------- | -------- | ---------------------------------------------------------------- |
+| **`name`**               | `string`       | `-`      | ✅       | the GitHub repository name                                       |
+| `allow_merge_commit`     | `bool`         | `false`  | ❌       | allow merging pull requests with a merge commit,                 |
+| `allow_rebase_merge`     | `bool`         | `true`   | ❌       | allow rebase-merging pull requests                               |
+| `allow_squash_merge`     | `bool`         | `true`   | ❌       | allow squash-merging pull requests                               |
+| `archived`               | `bool`         | `false`  | ❌       | archive this repository?                                         |
+| `default_branch`         | `string`       | `master` | ❌       | updates the default branch for this repository.                  |
+| `delete_branch_on_merge` | `bool`         | `true`   | ❌       | automatically delete head branches when pull requests are merged |
+| `description`            | `string`       | `-`      | ❌       | a short description of the repository                            |
+| `has_issues`             | `bool`         | `false`  | ❌       | enable issues for this repository                                |
+| `has_projects`           | `bool`         | `false`  | ❌       | enable projects for this repository                              |
+| `has_wiki`               | `bool`         | `false`  | ❌       | enable the wiki for this repository                              |
+| `homepage_url`           | `string`       | `-`      | ❌       | a URL with more information about the repository                 |
+| `is_template`            | `bool`         | `false`  | ❌       | make this repository available as a template repository          |
+| `private`                | `bool`         | `true`   | ❌       | create a private repository                                      |
+| `topics`                 | `list(string)` | `[]`     | ❌       | an array of topics to add to the repository.                     |
