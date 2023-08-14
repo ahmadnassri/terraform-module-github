@@ -25,11 +25,11 @@ variable "defaults" {
     homepage_url           = string
     is_template            = bool
     visibility             = string
-    topics                 = list(string)
+    topics                 = list(any)
     vulnerability_alerts   = bool
     enforce_admins         = bool
     require_pr             = bool
-    required_checks        = list(string)
+    required_checks        = list(any)
     required_reviews       = number
     require_linear         = bool
     require_signature      = bool
