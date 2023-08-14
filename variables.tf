@@ -5,7 +5,7 @@ variable "owner" {
 
 variable "repos" {
   description = "List of repos"
-  type = list(object({
+  type = map(object({
     allow_auto_merge       = bool
     allow_rebase_merge     = bool
     allow_merge_commit     = bool
