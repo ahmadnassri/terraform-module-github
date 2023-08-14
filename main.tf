@@ -1,69 +1,48 @@
-locals {
-  defaults = merge({
-    allow_auto_merge       = true
-    allow_rebase_merge     = true
-    allow_merge_commit     = false
-    allow_squash_merge     = false
-    archived               = false
-    default_branch         = "master"
-    delete_branch_on_merge = true
-    description            = ""
-    has_issues             = false
-    has_projects           = false
-    has_wiki               = false
-    homepage_url           = ""
-    is_template            = false
-    visibility             = "private"
-    topics                 = []
-    vulnerability_alerts   = true
-    enforce_admins         = false
-    require_pr             = true
-    required_checks        = []
-    required_reviews       = 1
-    require_linear         = true
-    require_signature      = true
-    dismiss_stale          = true
-    last_push_approval     = false
-  }, try(var.defaults, {}))
+# output "test" {
+#   value = var.defaults
+# }
+
+output "test2" {
+  # value = var.repos.terraform-module-github.protected_branches
+  value = try([coalesce(var.repos.terraform-module-github.protected_branches)], [var.defaults.default_branch])
 }
 
-# configure repository
 resource "github_repository" "repository" {
   for_each = var.repos
 
   name                   = each.key
   has_downloads          = false
-  allow_auto_merge       = try(each.value.allow_auto_merge, local.defaults.allow_auto_merge)
-  allow_merge_commit     = try(each.value.allow_merge_commit, local.defaults.allow_merge_commit)
-  allow_rebase_merge     = try(each.value.allow_rebase_merge, local.defaults.allow_rebase_merge)
-  allow_squash_merge     = try(each.value.allow_squash_merge, local.defaults.allow_squash_merge)
-  archived               = try(each.value.archived, local.defaults.archived)
-  delete_branch_on_merge = try(each.value.delete_branch_on_merge, local.defaults.delete_branch_on_merge)
-  description            = try(each.value.description, local.defaults.description)
-  has_issues             = try(each.value.has_issues, local.defaults.has_issues)
-  has_projects           = try(each.value.has_projects, local.defaults.has_projects)
-  has_wiki               = try(each.value.has_wiki, local.defaults.has_wiki)
-  homepage_url           = try(each.value.homepage_url, local.defaults.homepage_url)
-  is_template            = try(each.value.is_template, local.defaults.is_template)
-  visibility             = try(each.value.visibility, local.defaults.visibility)
-  topics                 = try(each.value.topics, local.defaults.topics)
-  vulnerability_alerts   = try(each.value.vulnerability_alerts, local.defaults.vulnerability_alerts)
+  allow_auto_merge       = try(coalesce(each.value.allow_auto_merge), var.defaults.allow_auto_merge)
+  allow_merge_commit     = try(coalesce(each.value.allow_merge_commit), var.defaults.allow_merge_commit)
+  allow_rebase_merge     = try(coalesce(each.value.allow_rebase_merge), var.defaults.allow_rebase_merge)
+  allow_squash_merge     = try(coalesce(each.value.allow_squash_merge), var.defaults.allow_squash_merge)
+  archived               = try(coalesce(each.value.archived), var.defaults.archived)
+  delete_branch_on_merge = try(coalesce(each.value.delete_branch_on_merge), var.defaults.delete_branch_on_merge)
+  description            = try(coalesce(each.value.description), var.defaults.description)
+  has_issues             = try(coalesce(each.value.has_issues), var.defaults.has_issues)
+  has_projects           = try(coalesce(each.value.has_projects), var.defaults.has_projects)
+  has_wiki               = try(coalesce(each.value.has_wiki), var.defaults.has_wiki)
+  homepage_url           = try(coalesce(each.value.homepage_url), var.defaults.homepage_url)
+  is_template            = try(coalesce(each.value.is_template), var.defaults.is_template)
+  visibility             = try(coalesce(each.value.visibility), var.defaults.visibility)
+  topics                 = try(coalesce(each.value.topics), var.defaults.topics)
+  vulnerability_alerts   = try(coalesce(each.value.vulnerability_alerts), var.defaults.vulnerability_alerts)
 
   dynamic "pages" {
-    for_each = try([each.value.pages], [])
+    for_each = try([coalesce(each.value.pages)], [])
 
     content {
       cname = try(pages.value.cname, null)
 
       source {
-        branch = try(pages.value.branch, "docs")
-        path   = try(pages.value.path, "/")
+        branch = try(coalesce(pages.value.branch), "docs")
+        path   = try(coalesce(pages.value.path), "/")
       }
     }
   }
 
   dynamic "template" {
-    for_each = try([each.value.template_repo], [])
+    for_each = try([coalesce(each.value.template_repo)], [])
 
     content {
       owner      = element(split("/", template.value), 0)
@@ -81,8 +60,8 @@ resource "github_repository" "repository" {
 
 resource "github_branch_default" "default" {
   for_each = {
-    for repo, config in var.repos : repo => try(config.default_branch, local.defaults.default_branch)
-    if lookup(config, "archived", false) == false
+    for repo, config in var.repos : repo => try(coalesce(config.default_branch), var.defaults.default_branch)
+    if github_repository.repository[repo].archived == false # exclude archived repos
   }
 
   repository = each.key
@@ -97,19 +76,19 @@ resource "github_branch_protection" "branch_protection" {
   for_each = {
     for x in flatten([
       for repo, config in var.repos : [
-        for branch in try(config.protected_branches, [local.defaults.default_branch]) : {
+        for branch in try([coalesce(config.protected_branches)], [var.defaults.default_branch]) : {
           repo               = repo
           branch             = branch
-          enforce_admins     = try(config.enforce_admins, local.defaults.enforce_admins)
-          require_pr         = try(config.require_pr, local.defaults.require_pr)
-          required_checks    = try(config.required_checks, local.defaults.required_checks)
-          require_linear     = try(config.require_linear, local.defaults.require_linear)
-          required_reviews   = try(config.required_reviews, local.defaults.required_reviews)
-          require_signature  = try(config.require_signature, local.defaults.require_signature)
-          dismiss_stale      = try(config.dismiss_stale, local.defaults.dismiss_stale)
-          last_push_approval = try(config.last_push_approval, local.defaults.last_push_approval)
+          enforce_admins     = try(coalesce(config.enforce_admins), var.defaults.enforce_admins)
+          require_pr         = try(coalesce(config.require_pr), var.defaults.require_pr)
+          required_checks    = try(coalesce(config.required_checks), var.defaults.required_checks)
+          require_linear     = try(coalesce(config.require_linear), var.defaults.require_linear)
+          required_reviews   = try(coalesce(config.required_reviews), var.defaults.required_reviews)
+          require_signature  = try(coalesce(config.require_signature), var.defaults.require_signature)
+          dismiss_stale      = try(coalesce(config.dismiss_stale), var.defaults.dismiss_stale)
+          last_push_approval = try(coalesce(config.last_push_approval), var.defaults.last_push_approval)
         }
-      ] if lookup(config, "archived", false) == false
+      ] if github_repository.repository[repo].archived == false # exclude archived repos
     ]) : "${x.repo}:${x.branch}" => x
   }
 
@@ -147,11 +126,11 @@ resource "github_actions_secret" "shared" {
   for_each = {
     for x in flatten([
       for repo, config in var.repos : [
-        for name in config.secrets : {
+        for name in try(coalesce(config.secrets), []) : {
           repo = repo
           name = name
         }
-      ] if can(config.secrets)
+      ] if can(config.secrets) # exclude repos without secrets
     ]) : "${x.repo}:${x.name}:${var.secret_rotation}" => x
   }
 
