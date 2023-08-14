@@ -1,14 +1,5 @@
-# output "test" {
-#   value = var.defaults
-# }
-
-output "test2" {
-  # value = var.repos.terraform-module-github.protected_branches
-  value = try([coalesce(var.repos.terraform-module-github.protected_branches)], [var.defaults.default_branch])
-}
-
 resource "github_repository" "repository" {
-  for_each = var.repos
+  for_each = var.repositories
 
   name                   = each.key
   has_downloads          = false
@@ -60,7 +51,7 @@ resource "github_repository" "repository" {
 
 resource "github_branch_default" "default" {
   for_each = {
-    for repo, config in var.repos : repo => try(coalesce(config.default_branch), var.defaults.default_branch)
+    for repo, config in var.repositories : repo => try(coalesce(config.default_branch), var.defaults.default_branch)
     if github_repository.repository[repo].archived == false # exclude archived repos
   }
 
@@ -75,7 +66,7 @@ resource "github_branch_default" "default" {
 resource "github_branch_protection" "branch_protection" {
   for_each = {
     for x in flatten([
-      for repo, config in var.repos : [
+      for repo, config in var.repositories : [
         for branch in try([coalesce(config.protected_branches)], [var.defaults.default_branch]) : {
           repo               = repo
           branch             = branch
@@ -125,7 +116,7 @@ resource "github_branch_protection" "branch_protection" {
 resource "github_actions_secret" "shared" {
   for_each = {
     for x in flatten([
-      for repo, config in var.repos : [
+      for repo, config in var.repositories : [
         for name in try(coalesce(config.secrets), []) : {
           repo = repo
           name = name
