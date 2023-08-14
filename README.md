@@ -11,7 +11,29 @@ an opinionated module for managing entire user/org github repositories
 module "github" {
   source = "github.com/ahmadnassri/terraform-module-github"
 
-  repos = { ... }
+  owner = "my-org"
+
+  secret_rotation = var.ROTATION_KEY
+
+  secrets = {
+    SUPER_SECRET_KEY = var.SUPER_SECRET_KEY_VALUE
+  }
+
+  defaults = {
+    allow_auto_merge       = true
+    allow_rebase_merge     = true
+    allow_merge_commit     = false
+    delete_branch_on_merge = true
+    dismiss_stale          = true
+  }
+
+  repositories = {
+    my-repo = {
+      description = "my repo description"
+      topics      = ["nodejs", "terraform", "github"]
+      secrets     = ["SUPER_SECRET_KEY"]
+    }
+  }
 }
 ```
 
