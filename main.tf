@@ -152,7 +152,7 @@ resource "github_actions_secret" "shared" {
           name = name
         }
       ] if can(config.secrets)
-    ]) : "${x.repo}:${x.name}:${var.secrets.ROTATION}" => x
+    ]) : "${x.repo}:${x.name}:${var.secret_rotation}" => x
   }
 
   repository      = each.value.repo
