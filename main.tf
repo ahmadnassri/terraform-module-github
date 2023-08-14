@@ -1,32 +1,30 @@
 locals {
-  defaults = {
-    repo = merge({
-      allow_auto_merge       = true
-      allow_rebase_merge     = true
-      allow_merge_commit     = false
-      allow_squash_merge     = false
-      archived               = false
-      default_branch         = "master"
-      delete_branch_on_merge = true
-      description            = ""
-      has_issues             = false
-      has_projects           = false
-      has_wiki               = false
-      homepage_url           = ""
-      is_template            = false
-      visibility             = "private"
-      topics                 = []
-      vulnerability_alerts   = true
-      enforce_admins         = false
-      require_pr             = true
-      required_checks        = []
-      required_reviews       = 1
-      require_linear         = true
-      require_signature      = true
-      dismiss_stale          = true
-      last_push_approval     = false
-    }, try(var.defaults.repo, {}))
-  }
+  defaults = merge({
+    allow_auto_merge       = true
+    allow_rebase_merge     = true
+    allow_merge_commit     = false
+    allow_squash_merge     = false
+    archived               = false
+    default_branch         = "master"
+    delete_branch_on_merge = true
+    description            = ""
+    has_issues             = false
+    has_projects           = false
+    has_wiki               = false
+    homepage_url           = ""
+    is_template            = false
+    visibility             = "private"
+    topics                 = []
+    vulnerability_alerts   = true
+    enforce_admins         = false
+    require_pr             = true
+    required_checks        = []
+    required_reviews       = 1
+    require_linear         = true
+    require_signature      = true
+    dismiss_stale          = true
+    last_push_approval     = false
+  }, try(var.defaults, {}))
 }
 
 # configure repository
@@ -35,21 +33,21 @@ resource "github_repository" "repository" {
 
   name                   = each.key
   has_downloads          = false
-  allow_auto_merge       = try(each.value.allow_auto_merge, local.defaults.repo.allow_auto_merge)
-  allow_merge_commit     = try(each.value.allow_merge_commit, local.defaults.repo.allow_merge_commit)
-  allow_rebase_merge     = try(each.value.allow_rebase_merge, local.defaults.repo.allow_rebase_merge)
-  allow_squash_merge     = try(each.value.allow_squash_merge, local.defaults.repo.allow_squash_merge)
-  archived               = try(each.value.archived, local.defaults.repo.archived)
-  delete_branch_on_merge = try(each.value.delete_branch_on_merge, local.defaults.repo.delete_branch_on_merge)
-  description            = try(each.value.description, local.defaults.repo.description)
-  has_issues             = try(each.value.has_issues, local.defaults.repo.has_issues)
-  has_projects           = try(each.value.has_projects, local.defaults.repo.has_projects)
-  has_wiki               = try(each.value.has_wiki, local.defaults.repo.has_wiki)
-  homepage_url           = try(each.value.homepage_url, local.defaults.repo.homepage_url)
-  is_template            = try(each.value.is_template, local.defaults.repo.is_template)
-  visibility             = try(each.value.visibility, local.defaults.repo.visibility)
-  topics                 = try(each.value.topics, local.defaults.repo.topics)
-  vulnerability_alerts   = try(each.value.vulnerability_alerts, local.defaults.repo.vulnerability_alerts)
+  allow_auto_merge       = try(each.value.allow_auto_merge, local.defaults.allow_auto_merge)
+  allow_merge_commit     = try(each.value.allow_merge_commit, local.defaults.allow_merge_commit)
+  allow_rebase_merge     = try(each.value.allow_rebase_merge, local.defaults.allow_rebase_merge)
+  allow_squash_merge     = try(each.value.allow_squash_merge, local.defaults.allow_squash_merge)
+  archived               = try(each.value.archived, local.defaults.archived)
+  delete_branch_on_merge = try(each.value.delete_branch_on_merge, local.defaults.delete_branch_on_merge)
+  description            = try(each.value.description, local.defaults.description)
+  has_issues             = try(each.value.has_issues, local.defaults.has_issues)
+  has_projects           = try(each.value.has_projects, local.defaults.has_projects)
+  has_wiki               = try(each.value.has_wiki, local.defaults.has_wiki)
+  homepage_url           = try(each.value.homepage_url, local.defaults.homepage_url)
+  is_template            = try(each.value.is_template, local.defaults.is_template)
+  visibility             = try(each.value.visibility, local.defaults.visibility)
+  topics                 = try(each.value.topics, local.defaults.topics)
+  vulnerability_alerts   = try(each.value.vulnerability_alerts, local.defaults.vulnerability_alerts)
 
   dynamic "pages" {
     for_each = try([each.value.pages], [])
@@ -83,7 +81,7 @@ resource "github_repository" "repository" {
 
 resource "github_branch_default" "default" {
   for_each = {
-    for repo, config in var.repos : repo => try(config.default_branch, local.defaults.repo.default_branch)
+    for repo, config in var.repos : repo => try(config.default_branch, local.defaults.default_branch)
     if lookup(config, "archived", false) == false
   }
 
@@ -99,17 +97,17 @@ resource "github_branch_protection" "branch_protection" {
   for_each = {
     for x in flatten([
       for repo, config in var.repos : [
-        for branch in try(config.protected_branches, [local.defaults.repo.default_branch]) : {
+        for branch in try(config.protected_branches, [local.defaults.default_branch]) : {
           repo               = repo
           branch             = branch
-          enforce_admins     = try(config.enforce_admins, local.defaults.repo.enforce_admins)
-          require_pr         = try(config.require_pr, local.defaults.repo.require_pr)
-          required_checks    = try(config.required_checks, local.defaults.repo.required_checks)
-          require_linear     = try(config.require_linear, local.defaults.repo.require_linear)
-          required_reviews   = try(config.required_reviews, local.defaults.repo.required_reviews)
-          require_signature  = try(config.require_signature, local.defaults.repo.require_signature)
-          dismiss_stale      = try(config.dismiss_stale, local.defaults.repo.dismiss_stale)
-          last_push_approval = try(config.last_push_approval, local.defaults.repo.last_push_approval)
+          enforce_admins     = try(config.enforce_admins, local.defaults.enforce_admins)
+          require_pr         = try(config.require_pr, local.defaults.require_pr)
+          required_checks    = try(config.required_checks, local.defaults.required_checks)
+          require_linear     = try(config.require_linear, local.defaults.require_linear)
+          required_reviews   = try(config.required_reviews, local.defaults.required_reviews)
+          require_signature  = try(config.require_signature, local.defaults.require_signature)
+          dismiss_stale      = try(config.dismiss_stale, local.defaults.dismiss_stale)
+          last_push_approval = try(config.last_push_approval, local.defaults.last_push_approval)
         }
       ] if lookup(config, "archived", false) == false
     ]) : "${x.repo}:${x.branch}" => x
