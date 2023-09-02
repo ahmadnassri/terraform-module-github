@@ -82,6 +82,7 @@ variable "repositories" {
 variable "secrets" {
   description = "repo secrets"
   type        = map(any)
+  default     = {}
 }
 
 variable "secret_rotation" {
