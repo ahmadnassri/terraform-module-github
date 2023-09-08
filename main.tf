@@ -1,3 +1,8 @@
+data "github_repositories" "archived" {
+  query           = "owner:${var.owner} archived:true"
+  include_repo_id = true
+}
+
 resource "github_repository" "repository" {
   for_each = var.repositories
 
@@ -52,7 +57,7 @@ resource "github_repository" "repository" {
 resource "github_branch_default" "default" {
   for_each = {
     for repo, config in var.repositories : repo => try(coalesce(config.default_branch), var.defaults.default_branch)
-    if github_repository.repository[repo].archived == false # exclude archived repos
+    if contains(data.github_repositories.archived.names, repo) == false # exclude archived repos
   }
 
   repository = each.key
@@ -79,7 +84,7 @@ resource "github_branch_protection" "branch_protection" {
           dismiss_stale      = try(coalesce(config.dismiss_stale), var.defaults.dismiss_stale)
           last_push_approval = try(coalesce(config.last_push_approval), var.defaults.last_push_approval)
         }
-      ] if github_repository.repository[repo].archived == false # exclude archived repos
+      ] if contains(data.github_repositories.archived.names, repo) == false # exclude archived repos
     ]) : "${x.repo}:${x.branch}" => x
   }
 
