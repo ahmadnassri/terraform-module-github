@@ -33,7 +33,7 @@ variable "defaults" {
     template_repo          = optional(string, "")
     protected_branches     = optional(list(string), [])
     secrets                = optional(list(string))
-    actions_access_level   = optional(string, "user")
+    actions_access_level   = optional(string, "none")
     pages = optional(object({
       cname  = optional(string)
       branch = optional(string)
