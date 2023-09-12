@@ -68,6 +68,13 @@ resource "github_branch_default" "default" {
   ]
 }
 
+resource "github_actions_repository_access_level" "actions_access_level" {
+  for_each = var.repositories
+
+  access_level = try(coalesce(each.value.actions_access_level), var.defaults.actions_access_level)
+  repository   = each.key
+}
+
 resource "github_branch_protection" "branch_protection" {
   for_each = {
     for x in flatten([
