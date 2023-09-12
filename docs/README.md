@@ -95,6 +95,7 @@ repos = {
 | `protected_branches`     | `list(string)` | `[]`      | ❌       | a list of branches to protect                                    |
 | `secrets`                | `list(string)` | `string`  | ❌       | a list of secrets to manage                                      |
 | `pages`                  | `object`       | `{}`      | ❌       | a map of pages configuration                                     |
+| `actions_access_level`   | `string`       | `user`    | ❌       | access level of a non-public repositories actions                |
 
 #### `pages`
 
