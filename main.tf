@@ -69,10 +69,19 @@ resource "github_branch_default" "default" {
 }
 
 resource "github_actions_repository_access_level" "actions_access_level" {
-  for_each = var.repositories
-
-  access_level = try(coalesce(each.value.actions_access_level), var.defaults.actions_access_level)
+  for_each = {
+    for repo, config in var.repositories : repo => try(coalesce(config.actions_access_level), var.defaults.actions_access_level)
+    if
+    contains(data.github_repositories.archived.names, repo) == false # exclude archived repos
+    &&
+    github_repository.repository[repo].visibility != "public" # exclude public repos
+  }
+  access_level = each.value
   repository   = each.key
+
+  depends_on = [
+    github_repository.repository
+  ]
 }
 
 resource "github_branch_protection" "branch_protection" {
