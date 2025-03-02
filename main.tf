@@ -76,6 +76,7 @@ resource "github_actions_repository_access_level" "actions_access_level" {
     &&
     github_repository.repository[repo].visibility != "public" # exclude public repos
   }
+
   access_level = each.value
   repository   = each.key
 
