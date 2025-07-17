@@ -1,5 +1,21 @@
 ## Usage
 
+setup a providers config for github
+
+```tf
+provider "github" {
+  owner = "org-name
+
+  app_auth {
+    id = var.GITHUB_APP_ID
+    installation_id = var.GITHUB_APP_INSTALLATION_ID
+    pem_file = var.GITHUB_APP_PEM_FILE
+  }
+}
+```
+
+use the module:
+
 ```tf
 module "github" {
   source = "github.com/ahmadnassri/terraform-module-github"

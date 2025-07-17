@@ -5,6 +5,7 @@ variable "owner" {
 
 variable "defaults" {
   description = "repo defaults"
+
   type = object({
     allow_auto_merge       = optional(bool, true)
     allow_rebase_merge     = optional(bool, true)
