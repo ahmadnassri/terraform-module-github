@@ -1,3 +1,11 @@
+terraform {
+  required_providers {
+    github = {
+      source  = "integrations/github"
+    }
+  }
+}
+
 data "github_repositories" "archived" {
   query           = "owner:${var.owner} archived:true"
   include_repo_id = true
